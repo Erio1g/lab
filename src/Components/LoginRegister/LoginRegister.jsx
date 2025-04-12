@@ -7,12 +7,10 @@ import logo from '../../assets/logo.png';
 const LoginRegister = () => {
     const [action, setAction] = useState('');
     const [loginData, setLoginData] = useState({ username: '', password: '' });
-    const [registerData, setRegisterData] = useState({ username: '', email: '', password: '' });
+    const [registerData, setRegisterData] = useState({ username: '', email: '', password: '', termsAccepted: false });
     const [loginError, setLoginError] = useState('');
     const [registerError, setRegisterError] = useState('');
     const navigate = useNavigate();
-  
-
 
     // Switch to Register view
     const registerLink = () => setAction(' active');
@@ -77,6 +75,11 @@ const LoginRegister = () => {
             return;
         }
 
+        if (!registerData.termsAccepted) {
+            setRegisterError('You must agree to the terms & conditions.');
+            return;
+        }
+
         try {
             // Replace this with your actual API URL when available
             const res = await fetch('https://localhost:7159/signup', {  // API URL for registration
@@ -85,7 +88,6 @@ const LoginRegister = () => {
                 body: JSON.stringify(registerData),
             });
 
-
             if (res.ok) {
                 alert('Registration successful. You can now log in.');
                 loginLink();  // Switch to login view after successful registration
@@ -93,11 +95,17 @@ const LoginRegister = () => {
                 const errorData = await res.json();
                 setRegisterError(errorData.message || 'Registration failed');
             }
-          
         } catch (error) {
             console.error('Register error:', error);
             setRegisterError('An error occurred during registration.');
         }
+    };
+
+    const handleCheckboxChange = (e) => {
+        setRegisterData({
+            ...registerData,
+            termsAccepted: e.target.checked,
+        });
     };
 
     return (
@@ -189,10 +197,13 @@ const LoginRegister = () => {
 
                         <div className="remember-forgot">
                             <label>
-                                <input  type="checkbox" /> I agree to the terms & conditions
+                                <input
+                                    type="checkbox"
+                                    checked={registerData.termsAccepted}
+                                    onChange={handleCheckboxChange}
+                                /> I agree to the terms & conditions
                             </label>
                         </div>
-
 
                         <button type="submit">Sign Up</button>
 
